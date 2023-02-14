@@ -1,0 +1,22 @@
+#!/bin/bash
+set +e
+
+# show parameters list
+echo "additional parameters list: $@"
+mkdir -p bin dist
+
+echo "running sshd..."
+/usr/sbin/sshd -D &
+
+echo "DAPPER_UID:DAPPER_GID ${DAPPER_UID}:${DAPPER_GID}..."
+
+if [ -e ${HOME}/scripts/$1 ]; then
+    ${HOME}/scripts/"$@"
+else
+    exec "$@"
+fi
+
+# setting for dapper
+# we will not run here, because this section is after 'exec'. exec command will not fork new process and wait for it's return.
+echo "changing DAPPER_UID:DAPPER_GID ${DAPPER_UID}:${DAPPER_GID}..."
+chown -R $DAPPER_UID:$DAPPER_GID .
